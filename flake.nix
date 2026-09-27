@@ -28,6 +28,6 @@
         inherit inputs;
       }
       {
-        imports = [ ./nix/flake.nix ];
+        imports = [ ./nix/parts.nix ];
       };
 }

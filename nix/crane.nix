@@ -48,7 +48,7 @@
         ## $ nix build .#my-crate
         inherit my-crate;
         ## $ nix build .
-        default = config.packages.my-crate;
+        crane = config.packages.my-crate;
       };
 
       ## XXX `apps` not needed. Fallback to running packages.
