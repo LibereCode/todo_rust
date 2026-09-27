@@ -1,0 +1,4 @@
+x 2026-09-27 2026-09-27 read input +Prototype
+(C) 2026-09-27 Simple args/flags +Prototype @config @cli
+(C) 2026-09-27 Parse text +Prototype @read
+(D) 2026-09-27 Colors +Prototype @ui @experiment

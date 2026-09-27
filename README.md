@@ -1,6 +1,8 @@
-# hello-rust
+# todo rust
 
-## setup
+Just finnished rustlings, time to get some hands-on experience...
+
+## devenv setup
 
 ```sh
 nix flake init --template templates#rust
