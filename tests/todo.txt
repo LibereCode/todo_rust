@@ -1,0 +1,2 @@
+(A) I am an +Example @todo.txt
+(C) 2026-09-27 Full syntax +Full @todo.txt due:2026-12-31

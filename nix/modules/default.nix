@@ -1,17 +1,17 @@
 {
-  ...
+    ...
 }:
 {
-  flake.nixosModules.default =
-    {
-      ...
-    }:
-    {
-      imports = [
-      ];
-      options = {
-      };
-      config = {
-      };
-    };
+    flake.nixosModules.default =
+        {
+            ...
+        }:
+        {
+            imports = [
+            ];
+            options = {
+            };
+            config = {
+            };
+        };
 }
