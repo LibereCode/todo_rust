@@ -1,4 +1,5 @@
 x 2026-09-27 2026-09-27 read input +Prototype
-(C) 2026-09-27 Simple args/flags +Prototype @config @cli
-(C) 2026-09-27 Parse text +Prototype @read
-(D) 2026-09-27 Colors +Prototype @ui @experiment
+(A) 2026-09-27 Simple args/flags +Prototype @config @cli
+(B) 2026-09-27 Parse text (parser.rs) - colorize +Prototype @parse
+x 2026-09-29 2026-09-27 Colors +Prototype @ui @experiment
+(D) 2026-09-29 Parse text (parser.rs) - metatable +Prototype @parse

@@ -1,7 +1,11 @@
 // TODO: ???
-// Should this instead be split into: `parser.rs` and `colorizer.rs`
-//      `parser.rs` => parse strings (entries) to a struct(?)
-//      `colorizer.rs` => take parser and colorize segments
+// Changed my mind
+// Parse here and return 2 things:
+//      1. Parsed String
+//      2. meta-table ??
+// Parse by taking input string, split into words (by whitespace),
+// then for each word split into chars (`word.as_byte()`),
+// then do simple logic comparing.
 
 use crate::colors::Colorize;
 
