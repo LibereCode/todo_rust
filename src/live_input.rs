@@ -5,6 +5,26 @@ use crossterm::{
     terminal,
 };
 
+/// Will print the current input (ie: _update_) on each key press.
+/// Parse / colorize directly here for those prints.
+///
+/// Returns the final String on **Return**-key.
+///
+/// # TODO
+/// - [ ] Colorize live
+///     1. Parse the current string.
+///     2. Colorize it.
+/// - [x] Cancel on CTRL-c
+///
+/// # Old (simple) version
+/// ```rust
+/// /* snip */
+/// let mut entry = String::new();
+/// io::stdin()
+///     .read_line(&mut entry)
+///     .expect("Failed to read line");
+/// /* snip */
+/// ```
 pub fn read_input_live() -> io::Result<String> {
     terminal::enable_raw_mode()?;
 
@@ -16,9 +36,6 @@ pub fn read_input_live() -> io::Result<String> {
     result
 }
 
-/// # TODO
-/// - [ ] Colorize live
-/// - [ ] Cancel on CTRL-c
 fn read_input() -> io::Result<String> {
     let mut input = String::new();
 

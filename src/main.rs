@@ -2,7 +2,10 @@ mod colors;
 use colors::Colorize;
 
 mod live_input;
-use live_input::read_input_live; // TODO
+use live_input::read_input_live;
+
+mod parser;
+use parser::Parse;
 
 use std::{
     fs::{self},
@@ -78,27 +81,26 @@ fn try_write(path: &Path, data: &str) -> io::Result<()> {
 fn main() -> io::Result<()> {
     println!(
         "{}",
-        "Write a todo.txt entry, (or something...)".color("yellow")
+        "Write a todo.txt entry, (or something...)".color("blue")
     );
-    // let mut entry = String::new();
-    // io::stdin()
-    //     .read_line(&mut entry)
-    //     .expect("Failed to read line");
     let entry: String = read_input_live()?;
-    println!("[DEBUG] todo.txt entry: \"{entry}\"");
+    // println!("[DEBUG] todo.txt entry: \"{entry}\"");
+    // let entry_parsed: String = entry.parse_todo();
+    // println!("[DEBUG] todo.txt entry_parsed: \"{entry_parsed}\"");
 
     let path = Path::new(TODO_PATH);
 
     try_write(path, entry.as_str())?;
 
     let text = fs::read_to_string(path).unwrap_or_default();
-    println!("DEBUG: text = \"{text}\"");
+    // println!("DEBUG: text = \"{text}\"");
 
     // TODO use something like this for the parser
     let /* mut */ lines_vec = text.lines().collect::<Vec<_>>();
 
     for (index, line) in lines_vec.into_iter().enumerate() {
-        println!("{}. {}", index + 1, line);
+        // println!("{}. {}", index + 1, line);
+        println!("{}. {}", index + 1, line.parse_todo());
     }
 
     Ok(())
