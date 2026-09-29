@@ -1,6 +1,9 @@
 mod colors;
 use colors::Colorize;
 
+mod live_input;
+use live_input::read_input_live; // TODO
+
 use std::{
     fs::{self},
     io::{self, Write},
@@ -77,10 +80,11 @@ fn main() -> io::Result<()> {
         "{}",
         "Write a todo.txt entry, (or something...)".color("yellow")
     );
-    let mut entry = String::new();
-    io::stdin()
-        .read_line(&mut entry)
-        .expect("Failed to read line");
+    // let mut entry = String::new();
+    // io::stdin()
+    //     .read_line(&mut entry)
+    //     .expect("Failed to read line");
+    let entry: String = read_input_live()?;
     println!("[DEBUG] todo.txt entry: \"{entry}\"");
 
     let path = Path::new(TODO_PATH);
