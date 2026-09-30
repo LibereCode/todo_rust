@@ -62,7 +62,7 @@ impl Parse for str {
             let last = bytes[bytes.len() - 1] as char;
 
             if index == 0 {
-                if word == "+" {
+                if word == "x" {
                     parsed.push(self.color(DONE_COLOR));
                     break;
                 } else if first == '(' && word.len() == 3 && last == ')' {
@@ -88,36 +88,6 @@ impl Parse for str {
         }
 
         parsed.join(" ")
-
-        // if self.starts_with("+ ") {
-        //     return self.color("grey");
-        // }
-        //
-        // if !self.starts_with('(') {
-        //     return self.to_owned();
-        // }
-        //
-        // let mut chars = self.chars();
-        // chars.next(); // skip '('
-        //
-        // let Some(prio) = chars.next() else {
-        //     return self.to_owned();
-        // };
-        //
-        // if chars.next() != Some(')') {
-        //     return self.to_owned();
-        // }
-        // let color = match prio {
-        //     'A' => PRIO_COLOR.a,
-        //     'B' => PRIO_COLOR.b,
-        //     'C' => PRIO_COLOR.c,
-        //     _ => return self.to_owned(),
-        // };
-        //
-        // let remaining: String = chars.into_iter().collect();
-        // let prio_part_pre: String = ['(', prio, ')'].into_iter().collect();
-        // let prio_part = prio_part_pre.color(color);
-        // format!("{}{}", prio_part, remaining)
     }
 }
 
@@ -132,7 +102,7 @@ mod tests {
         assert_eq!("(C) Prio C".parse_todo(), "\x1b[32m(C)\x1b[0m Prio C");
         assert_eq!("(D) Prio D".parse_todo(), "\x1b[36m(D)\x1b[0m Prio D");
         assert_eq!("(E) Other".parse_todo(), "\x1b[35m(E)\x1b[0m Other");
-        assert_eq!("+ (A) WARN".parse_todo(), "\x1b[90m+ (A) WARN\x1b[0m");
+        assert_eq!("x (A) WARN".parse_todo(), "\x1b[90mx (A) WARN\x1b[0m");
         assert_eq!("(A )Bad format?".parse_todo(), "(A )Bad format?");
     }
 }
