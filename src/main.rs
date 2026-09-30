@@ -1,3 +1,6 @@
+mod argparse;
+use crate::argparse::{Commands, Flags, ParsedArgs};
+
 mod colors;
 use colors::Colorize;
 
@@ -77,8 +80,33 @@ fn try_write(path: &Path, data: &str) -> io::Result<()> {
 }
 
 /// # TODO
+/// - [ ] I dunno, something good?
+///     At least do not just print shii
+fn intepret_args() {
+    // NOTE temporary
+    for i in argparse::parse() {
+        match i {
+            ParsedArgs::Command(cmd) => match cmd {
+                Commands::Add => println!("Cmd: Adding"),
+                Commands::Done => println!("Cmd: Doning"),
+                Commands::Ls => println!("Cmd: Listing"),
+                Commands::Rm => println!("Cmd: Removing"),
+            },
+            ParsedArgs::Flag(flag) => match flag {
+                Flags::File => println!("Flag: Filing"),
+                Flags::Help => println!("Flag: Helping"),
+                Flags::Verbose => println!("Flag: Verbosing"),
+                Flags::Version => println!("Flag: Versioning"),
+            },
+        }
+    }
+}
+
+/// # TODO
 /// - [ ] Minimize number of `?` used
 fn main() -> io::Result<()> {
+    intepret_args();
+
     println!(
         "{}",
         "Write a todo.txt entry, (or something...)".color("blue")
