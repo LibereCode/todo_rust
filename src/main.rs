@@ -14,32 +14,34 @@ use std::{
     fs::{self},
     io::{self, Write},
     path::Path,
+    process::exit,
 };
 
 /// # TODO
 /// move this to `config()`
 const TODO_PATH: &str = "out.todo.txt";
 
-// /// # TODO
-// /// - [ ] Use this in some `print_help()` function
-// const HELP: &str = "
-// todo_rust — read/write todo.txt. rust btw.
-//
-// Usage:
-//     todo_rust [OPTIONS]
-//
-// Options:
-//     -f, --file <FILE>    Target file
-//     -v, --verbose        Be more verbose
-//     -h, --help           Print this help
-//     -V, --version        Print version
-//
-// Commands:
-//     add [ENTRY]          Add an entry. Leave empty to get an input prompt.
-//     done [INDEX]         Mark an entry as done by index. Leave empty to to get an input prompt.
-//     ls                   List added entries (read todo file).
-//     rm [INDEX]           Remove an entry by index. Leave empty to to get an input prompt.
-// ";
+const HELP: &str = "
+todo_rust — read/write todo.txt. rust btw.
+
+Usage:
+    todo_rust [OPTIONS]
+
+Arguments:
+    -f, --file <FILE>    Target file
+    -h, --help           Print this help
+    -v, --verbose        Be more verbose
+    -V, --version        Print version
+
+Commands:
+    add [ENTRY]          Add an entry. Leave empty to get an input prompt.
+    done [INDEX]         Mark an entry as done by index. Leave empty to to get an input prompt.
+    ls                   List added entries (read todo file).
+    rm [INDEX]           Remove an entry by index. Leave empty to to get an input prompt.
+";
+
+/// `version = [major, minor, micro];`
+const VERSION: [u8; 3] = [0, 0, 1];
 
 // /// # TODO
 // /// - [ ] Read env-var or config file
@@ -82,7 +84,17 @@ fn try_write(path: &Path, data: &str) -> io::Result<()> {
 /// # TODO
 /// - [ ] I dunno, something good?
 ///   At least do not just print shii
-fn intepret_args() {
+/// - Arguments
+///   - [ ] -f, --file
+///   - [x] -h, --help
+///   - [ ] -v, --verbose
+///   - [x] -V, --version
+/// - Commands
+///   - [ ] add [ENTRY]
+///   - [ ] done [INDEX]
+///   - [ ] ls
+///   - [ ] rm [INDEX]
+fn interpret_args() {
     // NOTE temporary
     for i in argparse::parse() {
         match i {
@@ -94,9 +106,16 @@ fn intepret_args() {
             },
             ParsedArgs::Flag(flag) => match flag {
                 Flags::File => println!("Flag: Filing"),
-                Flags::Help => println!("Flag: Helping"),
+                Flags::Help => {
+                    println!("{HELP}");
+                    exit(0)
+                }
                 Flags::Verbose => println!("Flag: Verbosing"),
-                Flags::Version => println!("Flag: Versioning"),
+                Flags::Version => {
+                    let version = VERSION.map(|i| i.to_string()).join(".");
+                    println!("v{version}");
+                    exit(0)
+                }
             },
         }
     }
@@ -105,7 +124,7 @@ fn intepret_args() {
 /// # TODO
 /// - [ ] Minimize number of `?` used
 fn main() -> io::Result<()> {
-    intepret_args();
+    interpret_args();
 
     println!(
         "{}",
