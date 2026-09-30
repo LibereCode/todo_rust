@@ -5,6 +5,8 @@ use crossterm::{
     terminal,
 };
 
+use crate::parser::Parse;
+
 /// Will print the current input (ie: _update_) on each key press.
 /// Parse / colorize directly here for those prints.
 ///
@@ -91,7 +93,11 @@ fn read_input() -> io::Result<String> {
                 _ => {}
             }
 
-            print!("\r\x1b[2K{input}");
+            let input_parsed = input.as_str().parse_todo();
+            print!(
+                "\r\x1b[2K  parsed: {input_parsed}; {:>30}",
+                format!("raw: {}", input)
+            );
             std::io::stdout().flush()?;
         }
     }
