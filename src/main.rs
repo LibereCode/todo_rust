@@ -81,7 +81,7 @@ fn try_write(path: &Path, data: &str) -> io::Result<()> {
 
 /// # TODO
 /// - [ ] I dunno, something good?
-///     At least do not just print shii
+///   At least do not just print shii
 fn intepret_args() {
     // NOTE temporary
     for i in argparse::parse() {

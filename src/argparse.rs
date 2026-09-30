@@ -18,9 +18,9 @@ pub enum ParsedArgs {
 }
 /// # TODO
 /// - [ ] Should instead return a `Vec` or `Struct` of each _argument_ to use.
-///     `main()` will interpret what to do with those.
+///   `main()` will interpret what to do with those.
 /// - [ ] For some Commands/Flags, implement consuming the next arg as a positional argument.
-///     ie: `todo_rust --file "foobar"` or `todo_rust done 67`
+///   ie: `todo_rust --file "foobar"` or `todo_rust done 67`
 pub fn parse() -> Vec<ParsedArgs> {
     let mut v: Vec<ParsedArgs> = Vec::new();
     for (i, arg) in env::args().enumerate() {
@@ -43,9 +43,9 @@ pub fn parse() -> Vec<ParsedArgs> {
                     _ => panic!(
                         "Unknown command/flag.\n\tTODO: Better error handling for long flags / args ?"
                     ),
-                };
-            };
-        };
+                }
+            }
+        }
     }
     v
 }

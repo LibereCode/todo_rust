@@ -44,9 +44,9 @@ const PRIO_COLOR: PriorityColor = PriorityColor {
     other: "magenta",
 };
 
-const PROJECT_COLOR: &'static str = "green2";
-const CONTEXT_COLOR: &'static str = "cyan";
-const DONE_COLOR: &'static str = "grey";
+const PROJECT_COLOR: &str = "green2";
+const CONTEXT_COLOR: &str = "cyan";
+const DONE_COLOR: &str = "grey";
 
 pub trait Parse {
     fn parse_todo(&self) -> String;
@@ -79,7 +79,7 @@ impl Parse for str {
                     parsed.push(word.to_string());
                 }
             } else if first == '+' {
-                parsed.push(word.color(PROJECT_COLOR))
+                parsed.push(word.color(PROJECT_COLOR));
             } else if first == '@' {
                 parsed.push(word.color(CONTEXT_COLOR));
             } else {
