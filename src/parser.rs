@@ -130,7 +130,8 @@ mod tests {
         assert_eq!("(A) Prio A".parse_todo(), "\x1b[31m(A)\x1b[0m Prio A");
         assert_eq!("(B) Prio B".parse_todo(), "\x1b[33m(B)\x1b[0m Prio B");
         assert_eq!("(C) Prio C".parse_todo(), "\x1b[32m(C)\x1b[0m Prio C");
-        assert_eq!("(D) TODO...".parse_todo(), "(D) TODO...");
+        assert_eq!("(D) Prio D".parse_todo(), "\x1b[36m(D)\x1b[0m Prio D");
+        assert_eq!("(E) Other".parse_todo(), "\x1b[35m(E)\x1b[0m Other");
         assert_eq!("+ (A) WARN".parse_todo(), "\x1b[90m+ (A) WARN\x1b[0m");
         assert_eq!("(A )Bad format?".parse_todo(), "(A )Bad format?");
     }
