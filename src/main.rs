@@ -10,8 +10,10 @@ use live_input::read_input_live;
 mod parser;
 use parser::Parse;
 
+mod config;
+use config::Config;
+
 use std::{
-    collections::HashMap,
     fs::{self},
     io::{self, Write},
     path::Path,
@@ -44,43 +46,6 @@ Commands:
 /// `version = [major, minor, micro];`
 const VERSION: [u8; 3] = [0, 0, 1];
 
-// /// # TODO
-// /// - [ ] Read env-var or config file
-// /// - [ ] Default values
-// fn config() {
-// }
-//
-// /// TODO
-// #[derive(Debug)]
-// enum ConfigValue {
-//     String(String),
-//     Integer(i64),
-//     Boolean(bool),
-// }
-/// TODO
-struct Config {
-    values: HashMap<String, String /*ConfigValue*/>,
-    // values: HashMap<String, ConfigValue>, // TODO
-}
-impl Config {
-    fn new() -> Self {
-        Self {
-            values: HashMap::new(),
-        }
-    }
-    fn set(&mut self, key: &str, value: &str) {
-        self.values.insert(key.to_string(), value.to_string());
-    }
-    fn get(&mut self, key: &str) -> Option<&String> {
-        self.values.get(key)
-    }
-}
-
-// /// # TODO
-// /// - [ ] Implement `argparse`: reading --flags and commands (see HELP)
-// fn argparse() {
-// }
-
 /// # TODO
 /// - [ ] Minimize number of `?` used
 fn ensure_parent(path: &Path) -> io::Result<()> {
@@ -112,15 +77,15 @@ fn try_write(path: &Path, data: &str) -> io::Result<()> {
 /// - [ ] I dunno, something good?
 ///   At least do not just print shii
 /// - Arguments
-///   - [ ] -f, --file
+///   - [-] -f, --file
 ///   - [x] -h, --help
-///   - [ ] -v, --verbose
+///   - [-] -v, --verbose
 ///   - [x] -V, --version
 /// - Commands
-///   - [ ] add [ENTRY]
-///   - [ ] done [INDEX]
-///   - [ ] ls
-///   - [ ] rm [INDEX]
+///   - [-] add [ENTRY]
+///   - [-] done [INDEX]
+///   - [-] ls
+///   - [-] rm [INDEX]
 fn interpret_args(cfg: &mut Config) {
     // NOTE temporary
     for i in argparse::parse().unwrap() {
@@ -133,7 +98,7 @@ fn interpret_args(cfg: &mut Config) {
             },
             ParsedArgs::Flag(flag) => match flag {
                 Flags::File(file) => {
-                    cfg.set("file", file.as_str()); // FIXME should need to consume the next arg
+                    cfg.filepath = file;
                     // println!("Flag: Filing");
                 }
                 Flags::Help => {
@@ -141,7 +106,7 @@ fn interpret_args(cfg: &mut Config) {
                     exit(0)
                 }
                 Flags::Verbose => {
-                    cfg.set("verbose", "true"); // FIXME should be a boolean
+                    cfg.verbose = true;
                     // println!("Flag: Verbosing");
                 }
                 Flags::Version => {
@@ -158,7 +123,7 @@ fn interpret_args(cfg: &mut Config) {
 /// - [ ] Minimize number of `?` used
 fn main() -> io::Result<()> {
     let mut cfg = Config::new();
-    cfg.set("file", TODO_PATH);
+    cfg.filepath = TODO_PATH.to_string(); // NOTE temporary
 
     interpret_args(&mut cfg);
 
@@ -171,8 +136,7 @@ fn main() -> io::Result<()> {
     // let entry_parsed: String = entry.parse_todo();
     // println!("[DEBUG] todo.txt entry_parsed: \"{entry_parsed}\"");
 
-    let path = Path::new(cfg.get("file").expect("cfg.file is missing"));
-
+    let path = Path::new(cfg.filepath.as_str());
     try_write(path, entry.as_str())?;
 
     let text = fs::read_to_string(path).unwrap_or_default();
