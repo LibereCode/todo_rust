@@ -74,28 +74,81 @@ fn try_write(path: &Path, data: &str) -> io::Result<()> {
 }
 
 /// # TODO
+/// - [ ] If `verbose`: print a **parsed** + **colorized** version of _added entry_.
+fn add(cfg: &Config, data: &str) -> io::Result<()> {
+    println!(
+        "{}",
+        "Write a todo.txt entry, (or something...)".color("blue")
+    );
+    let path = Path::new(cfg.filepath.as_str());
+    try_write(path, data)?;
+
+    Ok(())
+}
+/// # TODO
+/// - [x] Use when no other command is used.
+fn add_interactive(cfg: &Config) -> io::Result<()> {
+    println!(
+        "{}",
+        "Write a todo.txt entry, (or something...)".color("blue")
+    );
+    let data = read_input_live()?;
+    let path = Path::new(cfg.filepath.as_str());
+    try_write(path, data.as_str())?;
+
+    Ok(())
+}
+
+// fn done() { } // TODO
+
+fn ls(cfg: &Config) -> io::Result<()> {
+    let path = Path::new(cfg.filepath.as_str());
+
+    let text = fs::read_to_string(path)?;
+
+    let /* mut */ lines_vec = text.lines().collect::<Vec<_>>();
+
+    for (index, line) in lines_vec.into_iter().enumerate() {
+        // println!("{}. {}", index + 1, line);
+        println!("{}. {}", index + 1, line.parse_todo());
+    }
+
+    Ok(())
+}
+
+// fn rm() { } // TODO
+
+/// # TODO
 /// - [ ] I dunno, something good?
 ///   At least do not just print shii
 /// - Arguments
-///   - [-] -f, --file
+///   - [x] -f, --file
 ///   - [x] -h, --help
 ///   - [-] -v, --verbose
+///     Implement ways it is used (ie, extra `println!()`s)
 ///   - [x] -V, --version
 /// - Commands
 ///   - [-] add [ENTRY]
 ///   - [-] done [INDEX]
 ///   - [-] ls
 ///   - [-] rm [INDEX]
-fn interpret_args(cfg: &mut Config) {
-    // NOTE temporary
+fn interpret_args(cfg: &mut Config) -> io::Result<()> {
+    let mut command_used = false;
     for i in argparse::parse().unwrap() {
         match i {
-            ParsedArgs::Command(cmd) => match cmd {
-                Commands::Add(string) => println!("Cmd: Adding; + arg: {string} -- TODO!()"), // TODO
-                Commands::Done(nr) => println!("Cmd: Doning; + arg: {nr} -- TODO!()"), // TODO
-                Commands::Ls => println!("Cmd: Listing -- TODO!()"),                   // TODO
-                Commands::Rm(nr) => println!("Cmd: Removing; + arg: {nr} -- TODO!()"), // TODO
-            },
+            ParsedArgs::Command(cmd) => {
+                match cmd {
+                    Commands::Add(data) => {
+                        add(cfg, data.as_str())?;
+                    }
+                    Commands::Done(nr) => println!("Cmd: Doning; + arg: {nr} -- TODO!()"), // TODO
+                    Commands::Ls => {
+                        ls(cfg)?;
+                    }
+                    Commands::Rm(nr) => println!("Cmd: Removing; + arg: {nr} -- TODO!()"), // TODO
+                }
+                command_used = true;
+            }
             ParsedArgs::Flag(flag) => match flag {
                 Flags::File(file) => {
                     cfg.filepath = file;
@@ -117,6 +170,12 @@ fn interpret_args(cfg: &mut Config) {
             },
         }
     }
+
+    if !command_used {
+        add_interactive(cfg)?;
+    }
+
+    Ok(())
 }
 
 /// # TODO
@@ -125,30 +184,24 @@ fn main() -> io::Result<()> {
     let mut cfg = Config::new();
     cfg.filepath = TODO_PATH.to_string(); // NOTE temporary
 
-    interpret_args(&mut cfg);
+    interpret_args(&mut cfg)?;
 
-    println!(
-        "{}",
-        "Write a todo.txt entry, (or something...)".color("blue")
-    );
-    let entry: String = read_input_live()?;
-    // println!("[DEBUG] todo.txt entry: \"{entry}\"");
-    // let entry_parsed: String = entry.parse_todo();
-    // println!("[DEBUG] todo.txt entry_parsed: \"{entry_parsed}\"");
+    // let path = Path::new(cfg.filepath.as_str());
 
-    let path = Path::new(cfg.filepath.as_str());
-    try_write(path, entry.as_str())?;
+    // add(&cfg, "idk?")?;
 
-    let text = fs::read_to_string(path).unwrap_or_default();
-    // println!("DEBUG: text = \"{text}\"");
-
-    // TODO use something like this for the parser
-    let /* mut */ lines_vec = text.lines().collect::<Vec<_>>();
-
-    for (index, line) in lines_vec.into_iter().enumerate() {
-        // println!("{}. {}", index + 1, line);
-        println!("{}. {}", index + 1, line.parse_todo());
-    }
+    // let text = fs::read_to_string(path).unwrap_or_default();
+    // // println!("DEBUG: text = \"{text}\"");
+    //
+    // // TODO use something like this for the parser
+    // let /* mut */ lines_vec = text.lines().collect::<Vec<_>>();
+    //
+    // for (index, line) in lines_vec.into_iter().enumerate() {
+    //     // println!("{}. {}", index + 1, line);
+    //     println!("{}. {}", index + 1, line.parse_todo());
+    // }
+    // TEST:
+    // ls(&cfg)?;
 
     Ok(())
 }
