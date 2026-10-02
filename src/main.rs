@@ -11,6 +11,7 @@ mod parser;
 use parser::Parse;
 
 use std::{
+    collections::HashMap,
     fs::{self},
     io::{self, Write},
     path::Path,
@@ -48,6 +49,32 @@ const VERSION: [u8; 3] = [0, 0, 1];
 // /// - [ ] Default values
 // fn config() {
 // }
+//
+// /// TODO
+// #[derive(Debug)]
+// enum ConfigValue {
+//     String(String),
+//     Integer(i64),
+//     Boolean(bool),
+// }
+/// TODO
+struct Config {
+    values: HashMap<String, String /*ConfigValue*/>,
+    // values: HashMap<String, ConfigValue>, // TODO
+}
+impl Config {
+    fn new() -> Self {
+        Self {
+            values: HashMap::new(),
+        }
+    }
+    fn set(&mut self, key: &str, value: &str) {
+        self.values.insert(key.to_string(), value.to_string());
+    }
+    fn get(&mut self, key: &str) -> Option<&String> {
+        self.values.get(key)
+    }
+}
 
 // /// # TODO
 // /// - [ ] Implement `argparse`: reading --flags and commands (see HELP)
@@ -94,23 +121,29 @@ fn try_write(path: &Path, data: &str) -> io::Result<()> {
 ///   - [ ] done [INDEX]
 ///   - [ ] ls
 ///   - [ ] rm [INDEX]
-fn interpret_args() {
+fn interpret_args(cfg: &mut Config) {
     // NOTE temporary
-    for i in argparse::parse() {
+    for i in argparse::parse().unwrap() {
         match i {
             ParsedArgs::Command(cmd) => match cmd {
-                Commands::Add => println!("Cmd: Adding"),
-                Commands::Done => println!("Cmd: Doning"),
-                Commands::Ls => println!("Cmd: Listing"),
-                Commands::Rm => println!("Cmd: Removing"),
+                Commands::Add(string) => println!("Cmd: Adding; + arg: {string} -- TODO!()"), // TODO
+                Commands::Done(nr) => println!("Cmd: Doning; + arg: {nr} -- TODO!()"), // TODO
+                Commands::Ls => println!("Cmd: Listing -- TODO!()"),                   // TODO
+                Commands::Rm(nr) => println!("Cmd: Removing; + arg: {nr} -- TODO!()"), // TODO
             },
             ParsedArgs::Flag(flag) => match flag {
-                Flags::File => println!("Flag: Filing"),
+                Flags::File(file) => {
+                    cfg.set("file", file.as_str()); // FIXME should need to consume the next arg
+                    // println!("Flag: Filing");
+                }
                 Flags::Help => {
                     println!("{HELP}");
                     exit(0)
                 }
-                Flags::Verbose => println!("Flag: Verbosing"),
+                Flags::Verbose => {
+                    cfg.set("verbose", "true"); // FIXME should be a boolean
+                    // println!("Flag: Verbosing");
+                }
                 Flags::Version => {
                     let version = VERSION.map(|i| i.to_string()).join(".");
                     println!("v{version}");
@@ -124,7 +157,10 @@ fn interpret_args() {
 /// # TODO
 /// - [ ] Minimize number of `?` used
 fn main() -> io::Result<()> {
-    interpret_args();
+    let mut cfg = Config::new();
+    cfg.set("file", TODO_PATH);
+
+    interpret_args(&mut cfg);
 
     println!(
         "{}",
@@ -135,7 +171,7 @@ fn main() -> io::Result<()> {
     // let entry_parsed: String = entry.parse_todo();
     // println!("[DEBUG] todo.txt entry_parsed: \"{entry_parsed}\"");
 
-    let path = Path::new(TODO_PATH);
+    let path = Path::new(cfg.get("file").expect("cfg.file is missing"));
 
     try_write(path, entry.as_str())?;
 
