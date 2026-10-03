@@ -2,14 +2,14 @@ use std::env::{self};
 
 #[derive(Debug, PartialEq)]
 pub enum Commands {
-    Add(String), // (String)
-    Done(usize), // (u8)
+    Add(String),
+    Done(usize),
     Ls,
-    Rm(usize), // (u8)
+    Rm(usize),
 }
 #[derive(Debug, PartialEq)]
 pub enum Flags {
-    File(String), // (String)
+    File(String),
     Help,
     Verbose,
     Version,
@@ -22,9 +22,10 @@ pub enum ParsedArgs {
 /// # TODO
 /// - [x] Should instead return a `Vec` or `Struct` of each _argument_ to use.
 ///   `main()` will interpret what to do with those.
-/// - [ ] For some Commands/Flags, implement consuming the next arg as a positional argument.
+/// - [x] For some Commands/Flags, implement consuming the next arg as a positional argument.
 ///   ie: `todo_rust --file "foobar"` or `todo_rust done 67`
 /// - [x] FIX implement Result<Vec<ParsedArgs>, String> -- See Reference
+/// - [ ] FIXME: Commands should be processed AFTER flags !! (+ should only allow 1 command ?)
 pub fn parse() -> Result<Vec<ParsedArgs>, String> {
     let mut parsed_vec: Vec<ParsedArgs> = Vec::new();
     let mut args = env::args().skip(1);

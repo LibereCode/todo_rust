@@ -1,5 +1,5 @@
 /// # TODO
-/// - [-] Have default values
+/// - [x] Have default values
 /// - [ ] If config-file exist, merge it with defaults.
 pub struct Config {
     pub filepath: String,

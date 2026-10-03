@@ -12,12 +12,6 @@ use crate::parser::Parse;
 ///
 /// Returns the final String on **Return**-key.
 ///
-/// # TODO
-/// - [ ] Colorize live
-///     1. Parse the current string.
-///     2. Colorize it.
-/// - [x] Cancel on CTRL-c
-///
 /// # Old (simple) version
 /// ```rust
 /// /* snip */
@@ -27,6 +21,12 @@ use crate::parser::Parse;
 ///     .expect("Failed to read line");
 /// /* snip */
 /// ```
+///
+/// # TODO
+/// - [x] Colorize live
+///     1. Parse the current string.
+///     2. Colorize it.
+/// - [x] Cancel on CTRL-c
 pub fn read_input_live() -> io::Result<String> {
     terminal::enable_raw_mode()?;
 

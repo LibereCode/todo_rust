@@ -1,3 +1,5 @@
 x 2026-09-27 2026-09-27 read input +Prototype
 x 2026-09-29 2026-09-27 Colors +Prototype @ui @experiment
 x 2026-09-30 2026-09-30 Colorize live preview +Prototype @parse @ui
+x 2026-10-03 2026-09-27 Simple args/flags +Prototype @config @cli
+x 2026-10-03 2026-09-27 Parse text (parser.rs) - colorize +Prototype @parse @ui

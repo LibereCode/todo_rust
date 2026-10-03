@@ -53,6 +53,7 @@ pub trait Parse {
 }
 
 impl Parse for str {
+    /// _Colorize_ (and _parse_) `&self`
     fn parse_todo(&self) -> String {
         let mut parsed: Vec<String> = Vec::new();
 

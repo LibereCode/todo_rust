@@ -83,6 +83,8 @@ fn add(cfg: &Config, data: &str) -> io::Result<()> {
     let path = Path::new(cfg.filepath.as_str());
     try_write(path, data)?;
 
+    cfg.verbose.then(|| println!("add: {}", data.parse_todo()));
+
     Ok(())
 }
 /// # TODO
@@ -95,6 +97,8 @@ fn add_interactive(cfg: &Config) -> io::Result<()> {
     let data = read_input_live()?;
     let path = Path::new(cfg.filepath.as_str());
     try_write(path, data.as_str())?;
+
+    cfg.verbose.then(|| println!("{}", data.parse_todo()));
 
     Ok(())
 }
@@ -128,9 +132,9 @@ fn ls(cfg: &Config) -> io::Result<()> {
 ///     Implement ways it is used (ie, extra `println!()`s)
 ///   - [x] -V, --version
 /// - Commands
-///   - [-] add [ENTRY]
+///   - [x] add [ENTRY]
 ///   - [-] done [INDEX]
-///   - [-] ls
+///   - [x] ls
 ///   - [-] rm [INDEX]
 fn interpret_args(cfg: &mut Config) -> io::Result<()> {
     let mut command_used = false;
@@ -160,7 +164,7 @@ fn interpret_args(cfg: &mut Config) -> io::Result<()> {
                 }
                 Flags::Verbose => {
                     cfg.verbose = true;
-                    // println!("Flag: Verbosing");
+                    cfg.verbose.then(|| println!("Flag: verbose=true"));
                 }
                 Flags::Version => {
                     let version = VERSION.map(|i| i.to_string()).join(".");
@@ -185,23 +189,6 @@ fn main() -> io::Result<()> {
     cfg.filepath = TODO_PATH.to_string(); // NOTE temporary
 
     interpret_args(&mut cfg)?;
-
-    // let path = Path::new(cfg.filepath.as_str());
-
-    // add(&cfg, "idk?")?;
-
-    // let text = fs::read_to_string(path).unwrap_or_default();
-    // // println!("DEBUG: text = \"{text}\"");
-    //
-    // // TODO use something like this for the parser
-    // let /* mut */ lines_vec = text.lines().collect::<Vec<_>>();
-    //
-    // for (index, line) in lines_vec.into_iter().enumerate() {
-    //     // println!("{}. {}", index + 1, line);
-    //     println!("{}. {}", index + 1, line.parse_todo());
-    // }
-    // TEST:
-    // ls(&cfg)?;
 
     Ok(())
 }

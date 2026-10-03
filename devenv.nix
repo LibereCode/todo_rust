@@ -13,6 +13,7 @@ in
     # https://devenv.sh/packages/
     packages = with pkgs; [
         git
+        bacon # TEST
     ];
 
     files.".editorconfig" = {
@@ -60,7 +61,10 @@ in
         git --version | grep --color=auto "${pkgs.git.version}"
     '';
 
-    scripts.clippy-pedantic.exec = "cargo clippy -- -W clippy::pedantic";
+    scripts = {
+        clippy-pedantic.exec = "cargo clippy -- -W clippy::pedantic";
+        bacon-pedantic.exec = "bacon clippy -- -- -W clippy::pedantic";
+    };
     # https://devenv.sh/processes/
     processes = {
         dev.exec = "${lib.getExe pkgs.watchexec} -n -- ls -la";
