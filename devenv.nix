@@ -62,8 +62,9 @@ in
     '';
 
     scripts = {
-        clippy-pedantic.exec = "cargo clippy -- -W clippy::pedantic";
         bacon-pedantic.exec = "bacon clippy -- -- -W clippy::pedantic";
+        clippy-pedantic.exec = "cargo clippy -- -W clippy::pedantic";
+        todo.exec = ''cargo run -- "''${@}"'';
     };
     # https://devenv.sh/processes/
     processes = {
