@@ -26,9 +26,9 @@ pub enum ParsedArgs {
 ///   ie: `todo_rust --file "foobar"` or `todo_rust done 67`
 /// - [x] FIX implement Result<Vec<ParsedArgs>, String> -- See Reference
 /// - [ ] FIXME: Commands should be processed AFTER flags !! (+ should only allow 1 command ?)
-pub fn parse() -> Result<Vec<ParsedArgs>, String> {
+pub fn parse(args: env::Args) -> Result<Vec<ParsedArgs>, String> {
     let mut parsed_vec: Vec<ParsedArgs> = Vec::new();
-    let mut args = env::args().skip(1);
+    let mut args = args.skip(1);
 
     while let Some(arg) = args.next() {
         if arg.starts_with('-') && !arg.starts_with("--") {
@@ -115,6 +115,20 @@ fn short_flags(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // TODO:
+    // #[test]
+    // fn test_flags() {
+    //     let fake_env_args: Args = todo!(); // XXX HOW???
+    //     let parsed_vec = parse(fake_env_args).unwrap();
+    //     assert_eq!(
+    //         parsed_vec,
+    //         vec![
+    //             ParsedArgs::Flag(Flags::Verbose),
+    //             ParsedArgs::Flag(Flags::Help),
+    //         ]
+    //     );
+    // }
 
     #[test]
     fn test_short_flags() {
