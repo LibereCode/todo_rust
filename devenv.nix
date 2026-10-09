@@ -45,7 +45,10 @@ in
     # services.postgres.enable = true;
 
     # https://devenv.sh/basics/
-    env.GREET = "devenv";
+    env = {
+        GREET = "devenv";
+        TODO_RUST_CONFIG = "tests/config.toml";
+    };
     # https://devenv.sh/scripts/
     scripts.hello.exec = ''
         echo hello from $GREET

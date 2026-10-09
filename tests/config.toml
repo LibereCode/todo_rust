@@ -1,0 +1,3 @@
+[main]
+filepath = "out.todo.txt"
+verbose = true

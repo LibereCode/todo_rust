@@ -1,6 +1,6 @@
 # todo rust
 
-Just finnished rustlings, time to get some hands-on experience...
+Just finished rustlings, time to get some hands-on experience...
 
 ## devenv setup
 

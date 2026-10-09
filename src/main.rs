@@ -81,10 +81,12 @@ fn add(cfg: &Config, data: &str) -> io::Result<()> {
         "{}",
         "Write a todo.txt entry, (or something...)".color("blue")
     );
-    let path = Path::new(cfg.filepath.as_str());
+    let path = Path::new(cfg.main.filepath.as_str());
     try_append(path, data)?;
 
-    cfg.verbose.then(|| println!("add: {}", data.parse_todo()));
+    cfg.main
+        .verbose
+        .then(|| println!("add: {}", data.parse_todo()));
 
     Ok(())
 }
@@ -96,18 +98,17 @@ fn add_interactive(cfg: &Config) -> io::Result<()> {
         "Write a todo.txt entry, (or something...)".color("blue")
     );
     let data = read_input_live()?;
-    let path = Path::new(cfg.filepath.as_str());
+    let path = Path::new(cfg.main.filepath.as_str());
     try_append(path, data.as_str())?;
 
-    cfg.verbose.then(|| println!("{}", data.parse_todo()));
+    cfg.main.verbose.then(|| println!("{}", data.parse_todo()));
 
     Ok(())
 }
 
-/// # TODO
-/// - [x] verbose print
+/// $ `line_nr` = `vector_index` + 1; $
 fn done(cfg: &Config, line_nr: usize) -> io::Result<()> {
-    let path = Path::new(cfg.filepath.as_str());
+    let path = Path::new(cfg.main.filepath.as_str());
 
     ensure_parent(path)?;
 
@@ -121,14 +122,15 @@ fn done(cfg: &Config, line_nr: usize) -> io::Result<()> {
 
     fs::write(path, lines.join("\n"))?;
 
-    cfg.verbose
+    cfg.main
+        .verbose
         .then(|| println!("done({}): {}", line_nr, lines[index].parse_todo()));
 
     Ok(())
 }
 
 fn ls(cfg: &Config) -> io::Result<()> {
-    let path = Path::new(cfg.filepath.as_str());
+    let path = Path::new(cfg.main.filepath.as_str());
 
     let text = fs::read_to_string(path)?;
 
@@ -145,7 +147,7 @@ fn ls(cfg: &Config) -> io::Result<()> {
 /// # TODO
 /// - [x] verbose print
 fn rm(cfg: &Config, line_nr: usize) -> io::Result<()> {
-    let path = Path::new(cfg.filepath.as_str());
+    let path = Path::new(cfg.main.filepath.as_str());
 
     ensure_parent(path)?;
 
@@ -156,7 +158,8 @@ fn rm(cfg: &Config, line_nr: usize) -> io::Result<()> {
 
     let index = line_nr - 1;
 
-    cfg.verbose
+    cfg.main
+        .verbose
         .then(|| println!("rm({}): {}", line_nr, lines[index].parse_todo()));
     lines.remove(index);
 
@@ -205,7 +208,7 @@ fn interpret_args(cfg: &mut Config) -> io::Result<()> {
             }
             ParsedArgs::Flag(flag) => match flag {
                 Flags::File(file) => {
-                    cfg.filepath = file;
+                    cfg.main.filepath = file;
                     // println!("Flag: Filing");
                 }
                 Flags::Help => {
@@ -213,8 +216,8 @@ fn interpret_args(cfg: &mut Config) -> io::Result<()> {
                     exit(0)
                 }
                 Flags::Verbose => {
-                    cfg.verbose = true;
-                    cfg.verbose.then(|| println!("Flag: verbose=true"));
+                    cfg.main.verbose = true;
+                    cfg.main.verbose.then(|| println!("Flag: verbose=true"));
                 }
                 Flags::Version => {
                     let version = VERSION.map(|i| i.to_string()).join(".");
@@ -234,9 +237,10 @@ fn interpret_args(cfg: &mut Config) -> io::Result<()> {
 
 /// # TODO
 /// - [ ] Minimize number of `?` used
-fn main() -> io::Result<()> {
-    let mut cfg = Config::new();
-    cfg.filepath = TODO_PATH.to_string(); // NOTE temporary
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cfg = config::load_config(String::new())?;
+    cfg.main.verbose.then(|| println!("{cfg:#?}"));
+    cfg.main.filepath = TODO_PATH.to_string(); // NOTE temporary
 
     interpret_args(&mut cfg)?;
 
