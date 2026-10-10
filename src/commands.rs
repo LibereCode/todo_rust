@@ -109,7 +109,7 @@ fn done(cfg: &Config, line_nr: usize) -> io::Result<()> {
     let index = line_nr - 1;
     lines[index].insert_str(0, "x ");
 
-    fs::write(path, lines.join("\n"))?;
+    fs::write(path, lines.join("\n") + "\n")?;
 
     cfg.main
         .verbose
@@ -150,7 +150,7 @@ fn rm(cfg: &Config, line_nr: usize) -> io::Result<()> {
         .then(|| println!("rm({}): {}", line_nr, lines[index].parse_todo()));
     lines.remove(index);
 
-    fs::write(path, lines.join("\n"))?;
+    fs::write(path, lines.join("\n") + "\n")?;
 
     Ok(())
 }

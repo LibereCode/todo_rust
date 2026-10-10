@@ -1,3 +1,3 @@
 [main]
-filepath = "out.todo.txt"
+filepath = "test.todo.txt"
 verbose = true

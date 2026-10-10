@@ -16,5 +16,5 @@ result
 /target
 
 #: other generated files
-out.todo.txt
+test.todo.txt
 FIXME.todo.txt
