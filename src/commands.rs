@@ -36,7 +36,7 @@ Commands:
 /// `version = [major, minor, micro];`
 ///
 /// # TODO:
-/// - [?] Instead parse `Cargo.toml`
+/// - [?] Instead parse [Cargo.toml](../Cargo.toml)
 const VERSION: [u8; 3] = [0, 0, 1];
 
 /// # TODO:
@@ -155,28 +155,19 @@ fn rm(cfg: &Config, line_nr: usize) -> io::Result<()> {
     Ok(())
 }
 
+/// Will first eval/run parsed _--flags_, and then the _commands_ if there are any.
+///
 /// # TODO:
 /// - Change commands to instead use `metatable`(**TODO**) from _argparse.rs_
 pub fn interpret_args(cfg: &mut Config) -> io::Result<()> {
     let mut command_used = false;
+    let mut cmds: Vec<Commands> = Vec::new();
     let args = env::args();
-    for i in argparse::parse(args).unwrap() {
-        match i {
+
+    for arg in argparse::parse(args).unwrap() {
+        match arg {
             ParsedArgs::Command(cmd) => {
-                match cmd {
-                    Commands::Add(data) => {
-                        add(cfg, data.as_str())?;
-                    }
-                    Commands::Done(nr) => {
-                        done(cfg, nr)?;
-                    }
-                    Commands::Ls => {
-                        ls(cfg)?;
-                    }
-                    Commands::Rm(nr) => {
-                        rm(cfg, nr)?;
-                    }
-                }
+                cmds.push(cmd);
                 command_used = true;
             }
             ParsedArgs::Flag(flag) => match flag {
@@ -201,7 +192,24 @@ pub fn interpret_args(cfg: &mut Config) -> io::Result<()> {
         }
     }
 
-    if !command_used {
+    if command_used {
+        for cmd in cmds {
+            match cmd {
+                Commands::Add(data) => {
+                    add(cfg, data.as_str())?;
+                }
+                Commands::Done(nr) => {
+                    done(cfg, nr)?;
+                }
+                Commands::Ls => {
+                    ls(cfg)?;
+                }
+                Commands::Rm(nr) => {
+                    rm(cfg, nr)?;
+                }
+            }
+        }
+    } else {
         add_interactive(cfg)?;
     }
 
