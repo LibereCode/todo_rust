@@ -1,3 +1,3 @@
-(D) 2026-09-29 Parse text (parser.rs) - metatable +Prototype @parse
-(C) 2026-09-30 Write tests for argparse.rs +Tests @cli
-x 2026-10-04 2026-10-03 Implement function for +Commands done(INDEX) and rm(INDEX) @cli
+(A) 2026-10-10 Parse the --flags before commands +Args @parse @cli
+(B) 2026-09-29 Parse text (parser.rs) - metatable +Metatable @parse
+(C) 2026-10-10 Redo some of the Args to instead use the parsed metatable. +Args @parse @cli

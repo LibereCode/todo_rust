@@ -1,5 +1,3 @@
-use std::env::{self};
-
 #[derive(Debug, PartialEq)]
 pub enum Commands {
     Add(String),
@@ -19,14 +17,17 @@ pub enum ParsedArgs {
     Command(Commands),
     Flag(Flags),
 }
+/// `args` should be of type `std::env::Args`:
+/// ```rust
+/// use std::env::{Args, args};
+/// use crate::argparse::{parse, ParsedArgs};
+///
+/// let args: Args = args();
+/// let parsed_args: Result<Vec<ParsedArgs>, String> = parse(args);
+/// ```
 /// # TODO
-/// - [x] Should instead return a `Vec` or `Struct` of each _argument_ to use.
-///   `main()` will interpret what to do with those.
-/// - [x] For some Commands/Flags, implement consuming the next arg as a positional argument.
-///   ie: `todo_rust --file "foobar"` or `todo_rust done 67`
-/// - [x] FIX implement Result<Vec<ParsedArgs>, String> -- See Reference
 /// - [ ] FIXME: Commands should be processed AFTER flags !! (+ should only allow 1 command ?)
-pub fn parse(args: env::Args) -> Result<Vec<ParsedArgs>, String> {
+pub fn parse(args: impl Iterator<Item = String>) -> Result<Vec<ParsedArgs>, String> {
     let mut parsed_vec: Vec<ParsedArgs> = Vec::new();
     let mut args = args.skip(1);
 
@@ -116,25 +117,29 @@ fn short_flags(
 mod tests {
     use super::*;
 
-    // TODO:
-    // #[test]
-    // fn test_flags() {
-    //     let fake_env_args: Args = todo!(); // XXX HOW???
-    //     let parsed_vec = parse(fake_env_args).unwrap();
-    //     assert_eq!(
-    //         parsed_vec,
-    //         vec![
-    //             ParsedArgs::Flag(Flags::Verbose),
-    //             ParsedArgs::Flag(Flags::Help),
-    //         ]
-    //     );
-    // }
+    #[test]
+    fn test_flags() {
+        let args = vec![
+            "todo_rust".to_string(),
+            "--verbose".to_string(),
+            "--help".to_string(),
+        ]
+        .into_iter();
+        let parsed_vec = parse(args).unwrap();
+        assert_eq!(
+            parsed_vec,
+            vec![
+                ParsedArgs::Flag(Flags::Verbose),
+                ParsedArgs::Flag(Flags::Help),
+            ]
+        );
+    }
 
     #[test]
     fn test_short_flags() {
         let mut parsed_vec: Vec<ParsedArgs> = Vec::new();
         let arg = String::from("-vh");
-        let mut args = env::args().skip(1);
+        let mut args = std::env::args().skip(1);
         short_flags(&mut parsed_vec, &mut args, &arg[1..]).unwrap();
         assert_eq!(
             parsed_vec,
