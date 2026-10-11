@@ -5,7 +5,7 @@ use crossterm::{
     terminal,
 };
 
-use crate::parser::Parse;
+use crate::parser::{ParseMetaTable, ParseStr};
 
 /// Will print the current input (ie: _update_) on each key press.
 /// Parse / colorize directly here for those prints.
@@ -21,12 +21,6 @@ use crate::parser::Parse;
 ///     .expect("Failed to read line");
 /// /* snip */
 /// ```
-///
-/// # TODO
-/// - [x] Colorize live
-///     1. Parse the current string.
-///     2. Colorize it.
-/// - [x] Cancel on CTRL-c
 pub fn read_input_live() -> io::Result<String> {
     terminal::enable_raw_mode()?;
 
@@ -38,6 +32,8 @@ pub fn read_input_live() -> io::Result<String> {
     result
 }
 
+/// # TODO
+/// - [ ] Automatically show/add current date after **(P)rio** (or prepend if prio's missing)
 fn read_input() -> io::Result<String> {
     let mut input = String::new();
 
@@ -64,18 +60,10 @@ fn read_input() -> io::Result<String> {
             match key.code {
                 KeyCode::Char(character) => {
                     input.push(character);
-
-                    // This is the current string after the key press.
-                    // print!("Current input: {input}\r");
-
-                    // Or process it here:
-                    // process_input(&input);
                 }
 
                 KeyCode::Backspace => {
                     input.pop();
-
-                    // println!("Current input: {input}\r");
                 }
 
                 KeyCode::Enter => {
@@ -87,16 +75,15 @@ fn read_input() -> io::Result<String> {
 
                 KeyCode::Esc => {
                     input.clear();
-                    // println!("\nInput cleared");
                 }
 
                 _ => {}
             }
 
-            let input_parsed = input.as_str().parse_todo();
+            let input_parsed = input.as_str().parse2metatable().parse_todo();
             print!(
                 "\r\x1b[2K  parsed: {input_parsed}; {:>30}",
-                format!("raw: {}", input)
+                format!("raw: {input}")
             );
             std::io::stdout().flush()?;
         }

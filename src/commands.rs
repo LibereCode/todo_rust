@@ -3,7 +3,7 @@ use crate::{
     colors::Colorize,
     config::Config,
     live_input::read_input_live,
-    parser::Parse,
+    parser::{ParseMetaTable, ParseStr},
 };
 
 use std::{
@@ -66,6 +66,8 @@ fn try_append(path: &Path, data: &str) -> io::Result<()> {
     Ok(())
 }
 
+/// # TODO:
+/// - [ ] Automatically add **creation-date** after **(P)rio** (or prepend if no prio).
 fn add(cfg: &Config, data: &str) -> io::Result<()> {
     println!(
         "{}",
@@ -76,7 +78,7 @@ fn add(cfg: &Config, data: &str) -> io::Result<()> {
 
     cfg.main
         .verbose
-        .then(|| println!("add: {}", data.parse_todo()));
+        .then(|| println!("add: {}", data.parse2metatable().parse_todo()));
 
     Ok(())
 }
@@ -90,12 +92,19 @@ fn add_interactive(cfg: &Config) -> io::Result<()> {
     let path = Path::new(cfg.main.filepath.as_str());
     try_append(path, data.as_str())?;
 
-    cfg.main.verbose.then(|| println!("{}", data.parse_todo()));
+    cfg.main
+        .verbose
+        .then(|| println!("{}", data.parse2metatable().parse_todo()));
 
     Ok(())
 }
 
 /// $ `line_nr` = `vector_index` + 1; $
+///
+/// # TODO:
+/// - [ ] Should remove/replace the **(P)rio** with the current _date_ (of when it was done)
+/// - [ ] Should instead toggle done
+///   ie: If first char is an _'x'_, remove it and the done-date
 fn done(cfg: &Config, line_nr: usize) -> io::Result<()> {
     let path = Path::new(cfg.main.filepath.as_str());
 
@@ -111,9 +120,13 @@ fn done(cfg: &Config, line_nr: usize) -> io::Result<()> {
 
     fs::write(path, lines.join("\n") + "\n")?;
 
-    cfg.main
-        .verbose
-        .then(|| println!("done({}): {}", line_nr, lines[index].parse_todo()));
+    cfg.main.verbose.then(|| {
+        println!(
+            "done({}): {}",
+            line_nr,
+            lines[index].parse2metatable().parse_todo()
+        );
+    });
 
     Ok(())
 }
@@ -127,7 +140,7 @@ fn ls(cfg: &Config) -> io::Result<()> {
 
     for (index, line) in lines_vec.into_iter().enumerate() {
         // println!("{}. {}", index + 1, line);
-        println!("{}. {}", index + 1, line.parse_todo());
+        println!("{}. {}", index + 1, line.parse2metatable().parse_todo());
     }
 
     Ok(())
@@ -145,9 +158,13 @@ fn rm(cfg: &Config, line_nr: usize) -> io::Result<()> {
 
     let index = line_nr - 1;
 
-    cfg.main
-        .verbose
-        .then(|| println!("rm({}): {}", line_nr, lines[index].parse_todo()));
+    cfg.main.verbose.then(|| {
+        println!(
+            "rm({}): {}",
+            line_nr,
+            lines[index].parse2metatable().parse_todo()
+        );
+    });
     lines.remove(index);
 
     fs::write(path, lines.join("\n") + "\n")?;
