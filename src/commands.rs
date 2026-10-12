@@ -1,9 +1,13 @@
+// use toml::Table;
+
+use chrono::Local;
+
 use crate::{
     argparse::{self, Commands, Flags, ParsedArgs},
     colors::Colorize,
     config::Config,
     live_input::read_input_live,
-    parser::{ParseMetaTable, ParseStr},
+    parser::{BodyPart, ParseMetaTable, ParseStr, Priority},
 };
 
 use std::{
@@ -35,12 +39,18 @@ Commands:
 
 /// `version = [major, minor, micro];`
 ///
-/// # TODO:
+/// # TODO: ?
 /// - [?] Instead parse [Cargo.toml](../Cargo.toml)
 const VERSION: [u8; 3] = [0, 0, 1];
 
-/// # TODO:
-/// - [?] Minimize number of `?` used
+// /// # FIXME:
+// /// - [ ] remove the '"' before/after version-string
+// fn get_version(cargo_path: &Path) -> Result<String, Box<dyn std::error::Error>> {
+//     let raw = fs::read_to_string(cargo_path)?;
+//     let as_toml = raw.parse::<Table>()?;
+//     Ok(as_toml["package"]["version"].to_string())
+// }
+
 fn ensure_parent(path: &Path) -> io::Result<()> {
     if let Some(parent) = path.parent()
         && !parent.as_os_str().is_empty()
@@ -50,8 +60,6 @@ fn ensure_parent(path: &Path) -> io::Result<()> {
     Ok(())
 }
 
-/// # TODO:
-/// - [?] Minimize number of `?` used
 fn try_append(path: &Path, data: &str) -> io::Result<()> {
     ensure_parent(path)?;
 
@@ -67,18 +75,32 @@ fn try_append(path: &Path, data: &str) -> io::Result<()> {
 }
 
 /// # TODO:
-/// - [ ] Automatically add **creation-date** after **(P)rio** (or prepend if no prio).
+/// - [!] Automatically add **creation-date** after **(P)rio** (or prepend if no prio).
 fn add(cfg: &Config, data: &str) -> io::Result<()> {
     println!(
         "{}",
         "Write a todo.txt entry, (or something...)".color("blue")
     );
+
+    let mut meta = data.parse2metatable();
+    if meta.date.is_none() {
+        let naive_date = Local::now().date_naive();
+        let index = match meta.prio {
+            Priority::None => 0,
+            _ => 1,
+        };
+        meta.body.insert(index, BodyPart::Date(naive_date));
+        meta.date = Some(naive_date);
+    }
+    let data_string = meta.to_raw();
+    let data = data_string.as_str();
+
     let path = Path::new(cfg.main.filepath.as_str());
     try_append(path, data)?;
 
     cfg.main
         .verbose
-        .then(|| println!("add: {}", data.parse2metatable().parse_todo()));
+        .then(|| println!("add: {}", data.parse2metatable().colorize()));
 
     Ok(())
 }
@@ -94,7 +116,7 @@ fn add_interactive(cfg: &Config) -> io::Result<()> {
 
     cfg.main
         .verbose
-        .then(|| println!("{}", data.parse2metatable().parse_todo()));
+        .then(|| println!("{}", data.parse2metatable().colorize()));
 
     Ok(())
 }
@@ -103,6 +125,7 @@ fn add_interactive(cfg: &Config) -> io::Result<()> {
 ///
 /// # TODO:
 /// - [ ] Should remove/replace the **(P)rio** with the current _date_ (of when it was done)
+///   ie: "(A) 2026-10-10 foobar" -> "x 2026-11-11 2026-10-10 foobar"
 /// - [ ] Should instead toggle done
 ///   ie: If first char is an _'x'_, remove it and the done-date
 fn done(cfg: &Config, line_nr: usize) -> io::Result<()> {
@@ -124,7 +147,7 @@ fn done(cfg: &Config, line_nr: usize) -> io::Result<()> {
         println!(
             "done({}): {}",
             line_nr,
-            lines[index].parse2metatable().parse_todo()
+            lines[index].parse2metatable().colorize()
         );
     });
 
@@ -140,7 +163,7 @@ fn ls(cfg: &Config) -> io::Result<()> {
 
     for (index, line) in lines_vec.into_iter().enumerate() {
         // println!("{}. {}", index + 1, line);
-        println!("{}. {}", index + 1, line.parse2metatable().parse_todo());
+        println!("{}. {}", index + 1, line.parse2metatable().colorize());
     }
 
     Ok(())
@@ -162,7 +185,7 @@ fn rm(cfg: &Config, line_nr: usize) -> io::Result<()> {
         println!(
             "rm({}): {}",
             line_nr,
-            lines[index].parse2metatable().parse_todo()
+            lines[index].parse2metatable().colorize()
         );
     });
     lines.remove(index);
@@ -202,6 +225,7 @@ pub fn interpret_args(cfg: &mut Config) -> io::Result<()> {
                 }
                 Flags::Version => {
                     let version = VERSION.map(|i| i.to_string()).join(".");
+                    // let version = get_version(Path::new("Cargo.toml")).unwrap();
                     println!("v{version}");
                     exit(0)
                 }

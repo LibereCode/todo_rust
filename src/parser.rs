@@ -37,7 +37,7 @@ pub enum BodyPart {
 /// - [ ] Use MetaTable.contexts
 pub struct MetaTable {
     pub prio: Priority,
-    // pub date: Option<NaiveDate>,
+    pub date: Option<NaiveDate>,
     // pub projects: Vec<String>,
     // pub contexts: Vec<String>,
     pub body: Vec<BodyPart>,
@@ -70,14 +70,15 @@ pub trait ParseStr {
 }
 
 pub trait ParseMetaTable {
-    fn parse_todo(&self) -> String;
+    fn colorize(&self) -> String;
+    fn to_raw(&self) -> String;
 }
 
 impl ParseStr for str {
     fn parse2metatable(&self) -> MetaTable {
         let mut body: Vec<BodyPart> = Vec::new();
         let mut prio = Priority::None;
-        let mut _date: Option<NaiveDate> = None;
+        let mut date: Option<NaiveDate> = None;
         let mut contexts: Vec<String> = Vec::new();
         let mut projects: Vec<String> = Vec::new();
 
@@ -107,7 +108,7 @@ impl ParseStr for str {
                     push_me = BodyPart::Prio(word.to_string());
                 } else {
                     push_me = BodyPart::Normal(word.to_string());
-                    _date = NaiveDate::parse_from_str(word, "%Y-%m-%d")
+                    date = NaiveDate::parse_from_str(word, "%Y-%m-%d")
                         .ok()
                         .inspect(|val| push_me = BodyPart::Date(*val));
                 }
@@ -120,7 +121,7 @@ impl ParseStr for str {
             } else {
                 push_me = BodyPart::Normal(word.to_string());
                 if index == 1 && prio != Priority::None {
-                    _date = NaiveDate::parse_from_str(word, "%Y-%m-%d")
+                    date = NaiveDate::parse_from_str(word, "%Y-%m-%d")
                         .ok()
                         .inspect(|val| push_me = BodyPart::Date(*val));
                 }
@@ -131,7 +132,7 @@ impl ParseStr for str {
 
         MetaTable {
             prio,
-            // date,
+            date,
             // projects,
             // contexts,
             body,
@@ -141,7 +142,7 @@ impl ParseStr for str {
 
 impl ParseMetaTable for MetaTable {
     /// _Colorize_ (and _parse_) `&self`
-    fn parse_todo(&self) -> String {
+    fn colorize(&self) -> String {
         let mut parsed: Vec<String> = Vec::new();
 
         for word in &self.body {
@@ -168,6 +169,20 @@ impl ParseMetaTable for MetaTable {
 
         parsed.join(" ")
     }
+
+    fn to_raw(&self) -> String {
+        let mut raw: Vec<String> = Vec::new();
+        for word in &self.body {
+            match word {
+                BodyPart::Date(date) => raw.push(date.to_string()),
+                BodyPart::Prio(s)
+                | BodyPart::Project(s)
+                | BodyPart::Context(s)
+                | BodyPart::Normal(s) => raw.push(s.to_owned()),
+            }
+        }
+        raw.join(" ")
+    }
 }
 
 #[cfg(test)]
@@ -177,31 +192,31 @@ mod tests {
     #[test]
     fn prio_parsed() {
         assert_eq!(
-            "(A) Prio A".parse2metatable().parse_todo(),
+            "(A) Prio A".parse2metatable().colorize(),
             "\x1b[31m(A)\x1b[0m Prio A"
         );
         assert_eq!(
-            "(B) Prio B".parse2metatable().parse_todo(),
+            "(B) Prio B".parse2metatable().colorize(),
             "\x1b[33m(B)\x1b[0m Prio B"
         );
         assert_eq!(
-            "(C) Prio C".parse2metatable().parse_todo(),
+            "(C) Prio C".parse2metatable().colorize(),
             "\x1b[32m(C)\x1b[0m Prio C"
         );
         assert_eq!(
-            "(D) Prio D".parse2metatable().parse_todo(),
+            "(D) Prio D".parse2metatable().colorize(),
             "\x1b[36m(D)\x1b[0m Prio D"
         );
         assert_eq!(
-            "(E) Other".parse2metatable().parse_todo(),
+            "(E) Other".parse2metatable().colorize(),
             "\x1b[35m(E)\x1b[0m Other"
         );
         assert_eq!(
-            "x (A) WARN".parse2metatable().parse_todo(),
+            "x (A) WARN".parse2metatable().colorize(),
             "\x1b[90mx (A) WARN\x1b[0m"
         );
         assert_eq!(
-            "(A )Bad format?".parse2metatable().parse_todo(),
+            "(A )Bad format?".parse2metatable().colorize(),
             "(A )Bad format?"
         );
     }

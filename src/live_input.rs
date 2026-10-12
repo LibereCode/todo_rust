@@ -1,11 +1,12 @@
 use std::io::{self, Write};
 
+use chrono::Local;
 use crossterm::{
     event::{self, Event, KeyCode, KeyEventKind},
     terminal,
 };
 
-use crate::parser::{ParseMetaTable, ParseStr};
+use crate::parser::{BodyPart, ParseMetaTable, ParseStr, Priority};
 
 /// Will print the current input (ie: _update_) on each key press.
 /// Parse / colorize directly here for those prints.
@@ -32,10 +33,9 @@ pub fn read_input_live() -> io::Result<String> {
     result
 }
 
-/// # TODO
-/// - [ ] Automatically show/add current date after **(P)rio** (or prepend if prio's missing)
 fn read_input() -> io::Result<String> {
     let mut input = String::new();
+    let mut meta = input.parse2metatable();
 
     println!("Preview:\r");
     loop {
@@ -70,7 +70,7 @@ fn read_input() -> io::Result<String> {
                     println!("\r");
                     io::stdout().flush()?;
 
-                    return Ok(input);
+                    return Ok(meta.to_raw());
                 }
 
                 KeyCode::Esc => {
@@ -80,7 +80,19 @@ fn read_input() -> io::Result<String> {
                 _ => {}
             }
 
-            let input_parsed = input.as_str().parse2metatable().parse_todo();
+            meta = input.parse2metatable();
+
+            if meta.date.is_none() {
+                let naive_date = Local::now().date_naive();
+                let index = match meta.prio {
+                    Priority::None => 0,
+                    _ => 1,
+                };
+                meta.body.insert(index, BodyPart::Date(naive_date));
+                meta.date = Some(naive_date);
+            }
+
+            let input_parsed = meta.colorize();
             print!(
                 "\r\x1b[2K  parsed: {input_parsed}; {:>30}",
                 format!("raw: {input}")

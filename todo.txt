@@ -1,3 +1,2 @@
-(A) 2026-10-10 Parse the --flags before commands +Args @parse @cli
-(B) 2026-09-29 Parse text (parser.rs) - metatable +Metatable @parse
-(C) 2026-10-10 Redo some of the Args to instead use the parsed metatable. +Args @parse @cli
+x 2026-10-12 2026-10-12 Auto add today's date if date's missing +Add @cli
+(B) 2026-10-12 done() should replace prio with done-date +Done @cli
