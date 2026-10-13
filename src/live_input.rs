@@ -37,16 +37,18 @@ fn read_input() -> io::Result<String> {
     let mut input = String::new();
     let mut meta = input.parse2metatable();
 
-    println!("Preview:\r");
+    println!("Live Input Preview\r");
+    print!("Parsed:\r\n");
+    print!("Raw:\r\n\x1b[1A");
     loop {
         if let Event::Key(key) = event::read()? {
-            // On some platforms, key events can include press/release events.
             if key.kind != KeyEventKind::Press {
                 continue;
             }
 
-            if key.code == KeyCode::Char('c')
-                && key.modifiers.contains(event::KeyModifiers::CONTROL)
+            // exit on Ctrl + c
+            if key.modifiers.contains(event::KeyModifiers::CONTROL)
+                && key.code == KeyCode::Char('c')
             {
                 print!("\r\n");
                 io::stdout().flush()?;
@@ -93,10 +95,16 @@ fn read_input() -> io::Result<String> {
             }
 
             let input_parsed = meta.colorize();
+
+            // print!(
+            //     "\r\x1b[2K  parsed: {input_parsed}; {:>30}",
+            //     format!("raw: {input}")
+            // );
             print!(
-                "\r\x1b[2K  parsed: {input_parsed}; {:>30}",
-                format!("raw: {input}")
+                "\r\x1b[2K\x1b[1A\x1b[2KParsed:\t{input_parsed}\r\n{:#}",
+                format!("Raw:\t{input}")
             );
+
             std::io::stdout().flush()?;
         }
     }
