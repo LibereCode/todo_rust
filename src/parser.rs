@@ -21,7 +21,7 @@ pub enum Priority {
     None,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum BodyPart {
     Prio(String),
     Date(NaiveDate),
@@ -30,7 +30,7 @@ pub enum BodyPart {
     Normal(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// # TODO:
 /// - [ ] Use MetaTable.date
 /// - [ ] Use MetaTable.projects

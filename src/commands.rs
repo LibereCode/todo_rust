@@ -122,12 +122,6 @@ fn add_interactive(cfg: &Config) -> io::Result<()> {
 }
 
 /// $ `line_nr` = `vector_index` + 1; $
-///
-/// # TODO:
-/// - [x] Should remove/replace the **(P)rio** with the current _date_ (of when it was done)
-///   ie: "(A) 2026-10-10 foobar" -> "x 2026-11-11 2026-10-10 foobar"
-/// - [ ] Should instead toggle done
-///   ie: If first char is an _'x'_, remove it and the done-date
 fn done(cfg: &Config, line_nr: usize) -> io::Result<()> {
     let path = Path::new(cfg.main.filepath.as_str());
 
@@ -143,8 +137,23 @@ fn done(cfg: &Config, line_nr: usize) -> io::Result<()> {
     let line_old = lines.remove(index);
 
     let meta_old = line_old.as_str().parse2metatable();
-    let mut body = meta_old.body;
-    if meta_old.prio != Priority::Done {
+    // println!("{meta_old:#?}"); // debug
+    let mut body = meta_old.clone().body;
+    let mut prio = Priority::Done;
+
+    if meta_old.prio == Priority::Done {
+        prio = Priority::None;
+        if let BodyPart::Prio(text) = &meta_old.body[0] {
+            // Removed "x {date}" from done'd entries.
+            body = text
+                .split_whitespace()
+                .skip(2)
+                .collect::<Vec<_>>()
+                .join(" ")
+                .parse2metatable()
+                .body;
+        }
+    } else {
         if meta_old.prio != Priority::None {
             body.remove(0);
         }
@@ -152,10 +161,11 @@ fn done(cfg: &Config, line_nr: usize) -> io::Result<()> {
         body.insert(1, BodyPart::Date(naive_date));
     }
     let meta_new = MetaTable {
-        prio: Priority::Done,
+        prio,
         body,
         ..meta_old
     };
+    // println!("{meta_new:#?}"); // debug
     let line_new = meta_new.to_raw();
 
     lines.insert(index, line_new);
@@ -214,9 +224,6 @@ fn rm(cfg: &Config, line_nr: usize) -> io::Result<()> {
 }
 
 /// Will first eval/run parsed _--flags_, and then the _commands_ if there are any.
-///
-/// # TODO:
-/// - Change commands to instead use `metatable`(**TODO**) from _argparse.rs_
 pub fn interpret_args(cfg: &mut Config) -> io::Result<()> {
     let mut command_used = false;
     let mut cmds: Vec<Commands> = Vec::new();
