@@ -12,11 +12,11 @@ use chrono::NaiveDate;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Priority {
-    Done,
     A,
     B,
     C,
     D,
+    Done,
     Other,
     None,
 }
@@ -44,20 +44,20 @@ pub struct MetaTable {
 }
 
 struct PriorityColor {
-    done: &'static str,
     a: &'static str,
     b: &'static str,
     c: &'static str,
     d: &'static str,
+    done: &'static str,
     other: &'static str,
 }
 
 const PRIO_COLOR: PriorityColor = PriorityColor {
-    done: "grey",
     a: "red",
     b: "yellow",
     c: "green",
     d: "cyan",
+    done: "grey",
     other: "magenta",
 };
 
@@ -143,6 +143,9 @@ impl ParseStr for str {
 impl ParseMetaTable for MetaTable {
     /// _Colorize_ (and _parse_) `&self`
     fn colorize(&self) -> String {
+        use BodyPart::{Context, Date, Normal, Project};
+        use Priority::{A, B, C, D, Done};
+
         let mut parsed: Vec<String> = Vec::new();
 
         for word in &self.body {
@@ -150,19 +153,19 @@ impl ParseMetaTable for MetaTable {
             match word {
                 BodyPart::Prio(prio) => {
                     let color = match self.prio {
-                        Priority::Done => PRIO_COLOR.done,
-                        Priority::A => PRIO_COLOR.a,
-                        Priority::B => PRIO_COLOR.b,
-                        Priority::C => PRIO_COLOR.c,
-                        Priority::D => PRIO_COLOR.d,
+                        A => PRIO_COLOR.a,
+                        B => PRIO_COLOR.b,
+                        C => PRIO_COLOR.c,
+                        D => PRIO_COLOR.d,
+                        Done => PRIO_COLOR.done,
                         _ => PRIO_COLOR.other,
                     };
                     parsed.push(prio.color(color));
                 }
-                BodyPart::Date(date) => parsed.push(date.to_string().color(DATE_COLOR)),
-                BodyPart::Project(proj) => parsed.push(proj.color(PROJECT_COLOR)),
-                BodyPart::Context(cont) => parsed.push(cont.color(CONTEXT_COLOR)),
-                BodyPart::Normal(norm) => parsed.push(norm.to_owned()),
+                Date(date) => parsed.push(date.to_string().color(DATE_COLOR)),
+                Project(proj) => parsed.push(proj.color(PROJECT_COLOR)),
+                Context(cont) => parsed.push(cont.color(CONTEXT_COLOR)),
+                Normal(norm) => parsed.push(norm.to_owned()),
                 // _ => {}
             }
         }
@@ -171,14 +174,12 @@ impl ParseMetaTable for MetaTable {
     }
 
     fn to_raw(&self) -> String {
+        use BodyPart::{Context, Date, Normal, Prio, Project};
         let mut raw: Vec<String> = Vec::new();
         for word in &self.body {
             match word {
-                BodyPart::Date(date) => raw.push(date.to_string()),
-                BodyPart::Prio(s)
-                | BodyPart::Project(s)
-                | BodyPart::Context(s)
-                | BodyPart::Normal(s) => raw.push(s.to_owned()),
+                Date(date) => raw.push(date.to_string()),
+                Prio(s) | Project(s) | Context(s) | Normal(s) => raw.push(s.to_owned()),
             }
         }
         raw.join(" ")

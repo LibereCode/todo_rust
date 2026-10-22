@@ -7,7 +7,7 @@ use crate::{
     colors::Colorize,
     config::Config,
     live_input::read_input_live,
-    parser::{BodyPart, ParseMetaTable, ParseStr, Priority},
+    parser::{BodyPart, MetaTable, ParseMetaTable, ParseStr, Priority},
 };
 
 use std::{
@@ -124,7 +124,7 @@ fn add_interactive(cfg: &Config) -> io::Result<()> {
 /// $ `line_nr` = `vector_index` + 1; $
 ///
 /// # TODO:
-/// - [ ] Should remove/replace the **(P)rio** with the current _date_ (of when it was done)
+/// - [x] Should remove/replace the **(P)rio** with the current _date_ (of when it was done)
 ///   ie: "(A) 2026-10-10 foobar" -> "x 2026-11-11 2026-10-10 foobar"
 /// - [ ] Should instead toggle done
 ///   ie: If first char is an _'x'_, remove it and the done-date
@@ -139,8 +139,26 @@ fn done(cfg: &Config, line_nr: usize) -> io::Result<()> {
         .collect();
 
     let index = line_nr - 1;
-    lines[index].insert_str(0, "x ");
+    let naive_date = Local::now().date_naive();
+    let line_old = lines.remove(index);
 
+    let meta_old = line_old.as_str().parse2metatable();
+    let mut body = meta_old.body;
+    if meta_old.prio != Priority::Done {
+        if meta_old.prio != Priority::None {
+            body.remove(0);
+        }
+        body.insert(0, BodyPart::Prio("x".to_string()));
+        body.insert(1, BodyPart::Date(naive_date));
+    }
+    let meta_new = MetaTable {
+        prio: Priority::Done,
+        body,
+        ..meta_old
+    };
+    let line_new = meta_new.to_raw();
+
+    lines.insert(index, line_new);
     fs::write(path, lines.join("\n") + "\n")?;
 
     cfg.main.verbose.then(|| {
